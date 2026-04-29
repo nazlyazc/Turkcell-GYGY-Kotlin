@@ -19,5 +19,5 @@
 
 ## 📸 Uygulama Ekran Görüntüsü
 
-![Uygulama Ekran Görüntüsü](kitap_kart_tasarimi.png)
+![Uygulama Ekran Görüntüsü](src/main/java/com/example/library_app/kitap_kart_tasarimi.png)
 
