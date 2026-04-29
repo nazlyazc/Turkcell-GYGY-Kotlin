@@ -16,10 +16,16 @@ import com.example.library_app.ui.viewmodel.AuthViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun RegisterScreen(onBackToLogin: () -> Unit) {
-    val authViewModel: AuthViewModel = viewModel()
+fun RegisterScreen(onNavigateToLogin: () -> Unit,
+                   onRegisterSuccess: () -> Unit,
+                   authViewModel: AuthViewModel = viewModel()
+)
+{
     val authState by authViewModel.authState.collectAsState()
 
+
+    var fullName by remember { mutableStateOf("") }
+    var studentNo by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -27,7 +33,7 @@ fun RegisterScreen(onBackToLogin: () -> Unit) {
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
             delay(2000)
-            onBackToLogin()
+            onNavigateToLogin()
         }
     }
 
@@ -40,6 +46,14 @@ fun RegisterScreen(onBackToLogin: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        OutlinedTextField(
+            value = fullName,
+            onValueChange = { fullName = it },
+            label = { Text("Ad Soyad") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = email,
@@ -66,12 +80,21 @@ fun RegisterScreen(onBackToLogin: () -> Unit) {
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+        OutlinedTextField(
+            value = studentNo,
+            onValueChange = { studentNo = it },
+            label = { Text("Öğrenci No (opsiyonel)") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (authState is AuthState.Loading) {
             CircularProgressIndicator()
         } else {
             Button(
-                onClick = { authViewModel.signUp(email, password) },
+                onClick = { authViewModel.signUp(email, password, fullName, studentNo) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Kayıt Ol")
@@ -79,7 +102,7 @@ fun RegisterScreen(onBackToLogin: () -> Unit) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            TextButton(onClick = onBackToLogin) {
+            TextButton(onClick = onNavigateToLogin) {
                 Text("Zaten hesabın var mı? Giriş Yap")
             }
         }

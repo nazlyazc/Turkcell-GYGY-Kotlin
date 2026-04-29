@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.library_app.ui.viewmodel.AuthState
@@ -34,13 +35,21 @@ import io.ktor.sse.SPACE
 
 @Composable
 fun LoginScreen(
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onLoginSuccess: (role: String) -> Unit,
+    authViewModel: AuthViewModel
 ) {
-    val authViewModel: AuthViewModel = viewModel()
+
     val authState by authViewModel.authState.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = authState) {
+        if (authState is AuthState.Success) {
+            onLoginSuccess((authState as AuthState.Success).role)
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
