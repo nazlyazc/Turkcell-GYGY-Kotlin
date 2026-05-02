@@ -38,8 +38,8 @@ class BookViewModel : ViewModel() {
             repository
                 .getAllBooks()
                 .onSuccess {
-                    _books.value = emptyList() // UI'ı tetiklemek için önce boşaltıp
-                    _books.value = it         // sonra güncel veriyi basıyoruz
+                    _books.value = emptyList()
+                    _books.value = it
                 }
                 .onFailure { _error.value = it.message }
             _isLoading.value = false
@@ -72,19 +72,19 @@ class BookViewModel : ViewModel() {
                     returnedAt = null
                 )
 
-                // 1. Kaydı oluştur
+
                 repository.createBorrowRecord(record)
 
-                // 2. Stok sayısını veritabanında 1 düşür
+
                 val newStockCount = book.availableCopies - 1
                 repository.updateBookStock(book.id, newStockCount)
 
                 println("DEBUG: Veritabanı güncellendi. Yeni beklenen stok: $newStockCount")
 
-                // 3. Veritabanının işlemi tam işlemesi için kısa bir bekleme
+
                 delay(800)
 
-                // 4. Hem genel kitap listesini hem de kullanıcının kendi listesini tazele
+
                 loadBooks()
                 fetchUserLoans(userId)
 
@@ -116,12 +116,12 @@ class BookViewModel : ViewModel() {
                 val book = _books.value.find { it.id == record.bookId }
                 val currentStock = book?.availableCopies ?: 0
 
-                // Repository üzerinden iadeyi yap
+
                 repository.returnBook(record.id, record.bookId, currentStock)
 
-                delay(1000) // Supabase'in işlemesi için kısa bir es
+                delay(1000)
 
-                // Listeleri tazele
+
                 loadBooks()
                 fetchUserLoans(userId)
 

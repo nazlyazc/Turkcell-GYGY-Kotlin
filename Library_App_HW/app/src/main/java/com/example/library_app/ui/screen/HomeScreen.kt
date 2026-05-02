@@ -46,8 +46,7 @@ fun HomeScreen(
                 book.author.contains(searchQuery, ignoreCase = true)
     }
 
-    // --- KRİTİK GÜNCELLEME: OTOMATİK YÖNLENDİRME ---
-    // Oturum kapandığı (Unauthenticated olduğu) an tetiklenir.
+
     LaunchedEffect(sessionState) {
         if (sessionState is SessionState.Unauthenticated) {
             onNavigateToLogin()
@@ -74,7 +73,7 @@ fun HomeScreen(
                     TextButton(onClick = onNavigateToBorrowedBooks) {
                         Text("Kiralamalarım", color = MaterialTheme.colorScheme.primary)
                     }
-                    // Çıkış Butonu: Sadece signOut() diyoruz, yönlendirmeyi LaunchedEffect yapacak.
+
                     IconButton(onClick = { authViewModel.signOut() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ExitToApp,

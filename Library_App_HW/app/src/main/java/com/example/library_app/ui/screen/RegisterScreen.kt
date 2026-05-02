@@ -103,7 +103,7 @@ fun RegisterScreen(
         } else {
             Button(
                 onClick = {
-                    // Form boş değilse kayıt işlemini başlat
+
                     if (email.isNotEmpty() && password.isNotEmpty() && fullName.isNotEmpty()) {
                         authViewModel.signUp(email, password, fullName, studentNo)
                     }
@@ -120,7 +120,7 @@ fun RegisterScreen(
             }
         }
 
-        // Durum Mesajları
+
         when (authState) {
             is AuthState.Success -> {
                 Text(
