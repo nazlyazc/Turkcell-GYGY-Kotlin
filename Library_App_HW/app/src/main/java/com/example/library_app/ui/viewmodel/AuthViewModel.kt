@@ -104,7 +104,7 @@ class AuthViewModel : ViewModel() {
             _authState.value = AuthState.Loading
             repository.signUp(email, password, fullName, studentNo)
                 .onSuccess {
-                    // Kayıt başarılı olduğunda Success durumuna geçiyoruz
+
                     _authState.value = AuthState.Success("student")
                     println("DEBUG: Kayıt Başarılı, AuthState Success oldu.")
                 }

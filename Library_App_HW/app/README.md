@@ -16,15 +16,15 @@ Bu proje, modern Android geliştirme pratikleri kullanılarak hazırlanmış, **
 
 ### 1. Ana Sayfa & Kitap Listesi
 Uygulama açıldığında kullanıcıyı karşılayan, tüm kitapların listelendiği ve arama yapılabilen ana ekran.
-![Kitap Listesi](kitap_listesi.png)
+![Kitap Listesi](screenshots/kitap_listesi.png)
 
 ### 2. Kiralamalarım & İade Ekranı
 Kullanıcının aktif ödünç aldığı kitapları takip edebildiği ve tek tıkla iade edebildiği ekran.
-![Kiralamalarım](kiralamalar.png)
+![Kiralamalarım](screenshots/kiralamalar.png)
 
 ### 3. Supabase Veritabanı (borrow_records)
 Arka planda tüm işlemlerin ilişkisel olarak tutulduğu veritabanı tablosu.
-![Supabase Kayıtları](supabase_borrow_records.png)
+![Supabase Kayıtları](screenshots/supabase_borrow_records.png)
 
 
 ## 🛡️ Güvenlik (RLS)

@@ -62,7 +62,7 @@ class AuthRepository {
 
                     filter {
 
-                        eq("user_id", userId) // Supabase'deki kolon ismi
+                        eq("user_id", userId)
 
                     }
 
