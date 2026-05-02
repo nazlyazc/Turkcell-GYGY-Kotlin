@@ -3,10 +3,15 @@ package com.example.library_app.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.library_app.data.model.Book
+import com.example.library_app.data.model.BorrowRecord
 import com.example.library_app.data.repository.BookRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 class BookViewModel : ViewModel() {
     private val repository = BookRepository()
@@ -20,6 +25,9 @@ class BookViewModel : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    private val _userLoans = MutableStateFlow<List<BorrowRecord>>(emptyList())
+    val userLoans: StateFlow<List<BorrowRecord>> = _userLoans
+
     init {
         loadBooks()
     }
@@ -29,9 +37,101 @@ class BookViewModel : ViewModel() {
             _isLoading.value = true
             repository
                 .getAllBooks()
-                .onSuccess { _books.value = it }
+                .onSuccess {
+                    _books.value = emptyList() // UI'ı tetiklemek için önce boşaltıp
+                    _books.value = it         // sonra güncel veriyi basıyoruz
+                }
                 .onFailure { _error.value = it.message }
             _isLoading.value = false
         }
     }
+
+    fun borrowBook(book: Book, userId: String) {
+        // Stok kontrolü
+        if (book.availableCopies <= 0) {
+            _error.value = "Bu kitap şu an stokta kalmamış."
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val formatter = DateTimeFormatter.ISO_DATE_TIME
+                val now = LocalDateTime.now()
+                val borrowedAt = now.format(formatter)
+                val dueDate = now.plusDays(5).format(formatter)
+
+                val record = BorrowRecord(
+                    id = UUID.randomUUID().toString(),
+                    studentId = userId,
+                    bookId = book.id,
+                    bookName = book.title, // Supabase'e ismini de gönderiyoruz
+                    borrowedAt = borrowedAt,
+                    dueDate = dueDate,
+                    returnedAt = null
+                )
+
+                // 1. Kaydı oluştur
+                repository.createBorrowRecord(record)
+
+                // 2. Stok sayısını veritabanında 1 düşür
+                val newStockCount = book.availableCopies - 1
+                repository.updateBookStock(book.id, newStockCount)
+
+                println("DEBUG: Veritabanı güncellendi. Yeni beklenen stok: $newStockCount")
+
+                // 3. Veritabanının işlemi tam işlemesi için kısa bir bekleme
+                delay(800)
+
+                // 4. Hem genel kitap listesini hem de kullanıcının kendi listesini tazele
+                loadBooks()
+                fetchUserLoans(userId)
+
+                println("DEBUG: Tüm listeler tazelendi.")
+
+            } catch (e: Exception) {
+                _error.value = "Ödünç alma işlemi başarısız: ${e.message}"
+                println("DEBUG: Hata: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchUserLoans(userId: String) {
+        viewModelScope.launch {
+            repository.getUserBorrowRecords(userId)
+                .onSuccess { _userLoans.value = it }
+                .onFailure { _error.value = it.message }
+        }
+    }
+
+    fun returnBook(record: BorrowRecord, userId: String) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                // Mevcut stoku bul (Listemizde güncel hali var)
+                val book = _books.value.find { it.id == record.bookId }
+                val currentStock = book?.availableCopies ?: 0
+
+                // Repository üzerinden iadeyi yap
+                repository.returnBook(record.id, record.bookId, currentStock)
+
+                delay(1000) // Supabase'in işlemesi için kısa bir es
+
+                // Listeleri tazele
+                loadBooks()
+                fetchUserLoans(userId)
+
+                println("DEBUG: Kitap başarıyla iade edildi.")
+            } catch (e: Exception) {
+                _error.value = "İade işlemi sırasında hata: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
 }
